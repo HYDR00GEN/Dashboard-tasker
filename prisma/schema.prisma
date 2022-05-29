@@ -24,4 +24,7 @@ model Content {
   position Int
   dashboard Dashboard @relation(fields: [dashboardId], references: [id])
   dashboardId String
+
+  
+  @@unique([id, dashboardId])
 }
