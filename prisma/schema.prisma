@@ -12,4 +12,16 @@ datasource db {
 
 model Dashboard {
   id String @id @default(cuid())
+  name String
+  //dash position of cards
+  position Int
+  contents Content[]
+}
+
+model Content {
+  id String @id @default(cuid())
+  text String
+  position Int
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id])
+  dashboardId String
 }
