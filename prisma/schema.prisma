@@ -10,12 +10,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                    String @id @default(cuid())
+  name                  String
+  email                 String @unique
+  passwordHash          String
+  dashboards             Dashboard[]
+}
+
 model Dashboard {
   id String @id @default(cuid())
   name String
-  //dash position of cards
   position Int
   contents Content[]
+  user User @relation(fields: [userId], references: [id])
+  userId String
+
+  @@unique([id, userId])
 }
 
 model Content {
@@ -27,4 +38,10 @@ model Content {
 
   
   @@unique([id, dashboardId])
+}
+
+model JwtKeys {
+  id Int @id @default(autoincrement())
+  privateKey String
+  publicKey String
 }
