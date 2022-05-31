@@ -4,6 +4,7 @@ import path from "path";
 import { Router } from "express";
 import { getJwtKeys } from "./key";
 import jwt from "jsonwebtoken"
+import {body, validationResult} from "express-validator";
 
 const app = Router();
 
@@ -55,10 +56,10 @@ app.use( async (req,res,next)=>{
  });
  
  //post for moving dashboardd
- app.post("/:dashboardId/move", async(req,res)=>{
-     //verify if dash exists
+ app.post("/:dashboardId/move", body("position").isInt(),async(req,res)=>{
      const {position} = req.body;
-     const {dashboardId} = req.params;
+     //has ! cause i forced to be an INT
+     const {dashboardId} = req.params!;
      const userId = res.locals.userId
      const ok = await dashboardService.moveDashboard(userId,dashboardId, position)
      if(!ok){
@@ -69,10 +70,14 @@ app.use( async (req,res,next)=>{
      res.send(dashboards)
  })
  
- app.post("/:dashboardId/:contentId/move", async(req,res)=>{
-     //specify pos & dash in which arrives
-     const to = req.body;
-     const {dashboardId,  contentId} = req.params;
+ app.post("/:dashboardId/:contentId/move",body("dashboardId").isString(),body("position").isInt(),async(req,res)=>{
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({ error: errors.array()})
+    } 
+    //specify pos & dash in which arrives
+     const to = req.body as {position: number, dashboardId: string};
+     const {dashboardId,  contentId} = req.params!;
      const userId = res.locals.userId
      const ok = await dashboardService.moveContent(
          userId,
@@ -89,15 +94,24 @@ app.use( async (req,res,next)=>{
      res.send(dashboards)
  })
  
- app.post("/", async(req,res)=>{
+ app.post("/", body("name").isString(), async(req,res)=>{
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({ error: errors.array()})
+    }
      const {name} = req.body;
      const userId = res.locals.userId
      await dashboardService.createDashboard(userId,name);
      const dashboards = await dashboardService.getDashboard(userId);
      res.send(dashboards)
  })
- app.post("/:dashboardId", async(req,res)=>{
-     const {dashboardId} = req.params
+ app.post("/:dashboardId", body("text").isString(), async(req,res)=>{
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({ error: errors.array()})
+    }
+     
+    const {dashboardId} = req.params!
      const {text} = req.body;
      const userId = res.locals.userId
  

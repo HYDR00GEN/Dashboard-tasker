@@ -1,6 +1,5 @@
 import { generateKeyPairSync } from "crypto";
 import {prisma} from "./prisma"
-import jwt from "jsonwebtoken"
 
 export interface JwtKeys{
     privateKey: string;
